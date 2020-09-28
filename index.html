@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8">
+		<title>Lab 1</title>
+		<link rel="shortcut icon" href="dino.png" type="image/png">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		<script type="text/javascript">
+			//function for clear
+			function res() {
+				$("#X").css("border-color", "black");
+				$("#Y").css("border-color", "black");
+				$("#table").empty();
+				$("#table").append("<tr> <th>X</th> <th>Y</th> <th>R</th> <th>текущее время</th> <th>время работы</th> <th>результат</th> </tr>");
+				$("#inimage").empty();
+			}
+
+			//function for processing results from the server
+			function funcSuccess(data) {
+				data = $.parseJSON(data);
+				if (data == "error") {
+					alert("Вы ввели некорректные данные")
+
+				} else if(data["result"] == "1") 
+					$(`<tr> 
+						<td>${data["x"]}</td> 
+						<td>${data["y"]}</td> 
+						<td>${data["r"]}</td> 
+						<td>${data["curtime"]}</td> 
+						<td>${data["exectime"]}</td> 
+						<td style='color: green'>${data["result"]}</td> </tr>`)
+					.appendTo("#table");
+				else $(`<tr> 
+						<td>${data["x"]}</td> 
+						<td>${data["y"]}</td> 
+						<td>${data["r"]}</td> 
+						<td>${data["curtime"]}</td> 
+						<td>${data["exectime"]}</td> 
+						<td style='color: red'>${data["result"]}</td> </tr>`)
+					.appendTo("#table");
+			}
+
+			//validation
+			$(document).ready (function () {
+				$("#load").bind("click", function () {
+					var x = $("#X").val();
+					var y = $("#Y").val();
+					var r = $("#R_select").val();
+					var xFlag = true;
+					var yFlag = true;
+
+					$("#X").css("border-color", "black");
+					if (x.replace(/\s+/g,' ')=="")
+						xFlag = false;
+					if (!$.isNumeric(x) || (x>=3) || (x<=-5))
+						xFlag = false;
+					if (y.replace(/\s+/g,' ')=="")
+						yFlag = false;
+					if (!$.isNumeric(y) || (y>=5) || (y<=-3))
+						yFlag = false;
+
+					if (!xFlag)
+						$("#X").css("border-color", "red");
+					if (!yFlag)
+						$("#Y").css("border-color", "red");
+
+					if (xFlag && yFlag) {
+						$("#X").css("border-color", "black");
+						$("#Y").css("border-color", "black");
+						var newX = 85 + (x/r)*60;
+						var newY = 89 - (y/r)*60;
+						$('#inimage').html("<svg width='170' height='170'><circle cx='" + newX + "' cy='" + newY + "' r='3' fill='red' /></svg>");
+
+
+						$.ajax ({
+							url: "check.php", 
+							type: "POST",
+							data: ({X: x, Y: y, R: r}),
+							dataType: "html", 
+							success: funcSuccess
+						});
+					}
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+		<div id="wrapper">
+		
+		<header>
+			<div class="header_content container">
+			<span id="my_name">Байтаков Абай, P3213</span>
+			<span id="variant">Вариант 2402</span>
+			</div>
+		</header>
+		
+		<div id="coords">
+		  <span class="name"><span class="text_name">График</span></span>
+		  <span id="image">
+		  		<!-- points -->
+		  		<span id="inimage">
+		 		</span>
+		 		<!-- graph -->
+		 		<svg width="230" height="230">
+		 			<!-- square -->
+		 			<rect class="shape" x="115" y="55" width="60" height="60" fill="skyblue" stroke="blue" stroke-width="1" />
+		 			<!-- triangle -->
+		 			<polygon class="shape" points="55,115 115,115 115,55" fill="skyblue" stroke="blue" stroke-width="1" />
+		 			<!-- circle -->	
+		 			<path d="M 85 115 A 30 30 0 0 0 115 145 L 115 115 Z" fill="skyblue" stroke="blue" stroke-width="1" />
+		 			<!-- axes -->
+		 			<line x1="115" y1="200" x2="115" y2="30" stroke="black" stroke-width="1" />
+		 			<line x1="30" y1="115" x2="200" y2="115" stroke="black" stroke-width="1" />
+		 			<polygon points="110,30 115,20 120,30" fill="black" />
+		 			<polygon points="200,110 210,115 200, 120" fill="black" />
+		 			<line x1="112" y1="85" x2="118" y2="85" stroke="black" stroke-width="1" />
+		 			<line x1="112" y1="55" x2="118" y2="55" stroke="black" stroke-width="1" />
+		 			<line x1="112" y1="145" x2="118" y2="145" stroke="black" stroke-width="1" />
+		 			<line x1="112" y1="175" x2="118" y2="175" stroke="black" stroke-width="1" />
+		 			<line x1="55" y1="112" x2="55" y2="118" stroke="black" stroke-width="1" />
+		 			<line x1="85" y1="112" x2="85" y2="118" stroke="black" stroke-width="1" />
+		 			<line x1="145" y1="112" x2="145" y2="118" stroke="black" stroke-width="1" />
+		 			<line x1="175" y1="112" x2="175" y2="118" stroke="black" stroke-width="1" />
+		 			<!-- text -->
+		 			<text x="120" y="30" class="svgtext">Y</text>
+		 			<text x="120" y="60" class="svgtext">R</text>
+		 			<text x="120" y="90" class="svgtext">R/2</text>
+		 			<text x="120" y="150" class="svgtext">R/2</text>
+		 			<text x="120" y="180" class="svgtext">R</text>
+		 			<text x="50" y="108" class="svgtext">R</text>
+		 			<text x="80" y="108" class="svgtext">R/2</text>
+		 			<text x="140" y="108" class="svgtext">R/2</text>
+		 			<text x="170" y="108" class="svgtext">R</text>
+		 			<text x="195" y="108" class="svgtext">X</text>
+		 		</svg>
+		  </span>
+		</div>
+		
+		<!-- entering values -->
+		<div id="parameters">
+		  <span id="parameters_name" class="name"><span class="text_name">Значения</span></span>
+		  <br />
+		  <span id="values">
+		  <form name="test">
+			<label for="X"> X: </label> <input class="text-field" type="text" name="X" id="X" placeholder="введите значение (-5 ... 3)"> <br> <br>
+			<label for="Y"> Y: </label> <input class="text-field" type="text" name="Y" id="Y" placeholder="введите значение (-3 ... 5)"> <br> <br>
+			<label for="R_select">R:</label> <span id="R_form"> 
+			  	<select id = "R_select">
+			  		<option value="1"> 1 </option>
+			  		<option value="2"> 2 </option>
+			  		<option value="3"> 3 </option>
+			  		<option value="4"> 4 </option>
+			  		<option value="5"> 5 </option>
+				</select>
+			  </span>
+			 <br> <br>
+			<div id="buttons-container">
+				<input class="button" type="button" id="load" name="submit" value="отправить">
+				<input class="button" type="reset" name="reset" value="очистить" onclick="return res()">
+			</div>
+				
+			</div>
+
+		  </form>
+		  </span>
+		</div>
+		
+		<!-- table -->
+		<div id="table_block">
+			<span id="table_name" class="name"><span class="text_name"> Таблица </span></span>
+			<div id="undertable_block">
+			<table id="table">
+			<tr>
+				<th>X</th>
+				<th>Y</th>
+				<th>R</th>
+				<th>текущее время</th>
+				<th>время работы</th>
+				<th>результат</th>
+			</tr>
+			</table>
+			</div>
+		</div>
+		</div>
+
+		<!-- css style -->
+		<style type="text/css">
+			body, html {
+				margin: 0 auto;
+				padding: 10px;
+				width: 100%;
+				height: 100%;
+				background-color: #F8F8FF;
+				max-width: 1080px;
+				font-size: 1.1em;
+				font-family: sans-serif;
+				position: relative;
+			}
+
+			header {
+				margin-top: 0;
+				background-color: #f28dd5;
+				height: 50px;
+				margin-bottom: 20px;
+				color: #FFFFFF;
+			}
+
+			#coords {
+				float: left;
+				background-color: #FFFFFF;
+				width: calc(50% - 10px);
+				height: 280px;
+				border: 10px;
+				position: relative;
+			}
+
+			.name {
+				display: flex;
+				justify-content: center;
+				position: absolute;
+				left: 0;
+				right: 0;
+				margin: auto;
+				background-color: #f28dd5;
+				height: 50px;
+				color: #FFFFFF;	
+			}
+
+			.text_name {
+				margin-top: 12px;
+			}
+
+			#coords #image {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				position: absolute;
+				top: calc(50% - 90px);
+				left: 0;
+				right: 0;
+				margin: auto;
+			}
+
+			#inimage {
+				position: absolute;
+				top: calc(50% - 90px);
+				height: 170px;
+				width: 170px;
+			}
+
+			.svgtext {
+				font-size: 0.6em;
+			}
+
+			#parameters {
+				float: right;
+				background-color: #FFFFFF;
+				margin-left: 20px;
+				width: calc(50% - 10px);
+				height: 280px;
+				position: relative;
+			}
+
+			#values {
+				position: absolute;
+				float: left;
+				top: calc(50% - 70px);
+				margin-left: 27%;
+			}
+
+			#table_block {
+				margin-top: 20px;
+				float: left;
+				background-color: #edb4e1;
+				height: 350px;
+				width: 100%;
+				position: relative;
+			}	
+
+			#undertable_block {
+				width: 100%;
+				margin-top: 50px;
+				height: calc(100% - 50px);
+				overflow-y: scroll;
+				position: relative;
+			}
+
+			#table {
+				position: absolute;
+				border: #FFFFFF;
+				text-align: center;
+				font-size: 15px;
+				border-collapse: separate; 
+				border-spacing: 0.2em;
+				width: 100%;
+			}
+
+			th, td {
+				padding: 10px 20px;
+				background: #eb9bd9;
+			}
+
+			#variant {
+				margin-top: 15px;
+				margin-right: 5px;
+				float: right;
+			}
+
+			#my_name {
+				margin-top: 15px;
+				margin-left: 5px;
+				float: left;
+			}
+
+			#R_select {
+				width: 100px;
+				border-radius: 5px;
+			}	
+
+			.text-field {
+				width: 200px;
+				border-radius: 5px;
+			}
+
+			#buttons-container {
+				position: absolute;
+				width: 100%;
+				text-align: center;
+			}
+
+			#buttons-container::before {
+				content: "";
+				display: block;
+				width: 100px;
+				height: 2px;
+				margin: -10px auto 7%;
+				background-color: #f28dd5;
+			}
+
+			.button {
+				height: 30px;
+				border: 0;
+				border-radius: 5px;
+				color: #ffffff;
+				background-color: #f28dd5;		
+			}
+
+			.button[type="reset"]:hover {
+				cursor: pointer;
+			}
+
+			.button:hover {
+				background-color: #de87db;
+			}
+
+			.button:focus {
+				outline: none;
+			}
+		</style>
+	</body>
+</html>
